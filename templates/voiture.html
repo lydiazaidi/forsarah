@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Voitures</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Sidebar styles */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 48px 0 0;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+        }
+
+        #sidebar .nav-link {
+            font-weight: 500;
+            color: #333;
+        }
+
+        #sidebar .nav-link.active {
+            color: #007bff;
+        }
+
+        #sidebar .navbar-brand {
+            text-align: center;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .option-list,
+        .color-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .option-item,
+        .color-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .option-input,
+        .color-input {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            Dashboard
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Gestion des Voitures</h1>
+                </div>
+
+                <!-- Button to Open the Add Modal -->
+                <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addVoitureModal">Ajouter une Voiture</button>
+
+                <!-- Add Voiture Modal -->
+                <div class="modal fade" id="addVoitureModal" tabindex="-1" aria-labelledby="addVoitureModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="addVoitureModalLabel">Ajouter une Voiture</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="addVoitureForm" action="/voitures/createVoiture" method="post" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <label for="modele" class="form-label">Modèle</label>
+                                        <input type="text" id="modele" name="modele" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="prix" class="form-label">Prix</label>
+                                        <input type="number" step="0.01" id="prix" name="prix" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="disponibilite" class="form-label">Disponibilité</label>
+                                        <select id="disponibilite" name="disponibilite" class="form-select" required>
+                                            <option value="DISPONIBLE_IMMEDIATEMENT">Disponible Immédiatement</option>
+                                            <option value="DISPONIBLE_SUR_COMMANDE">Disponible sur Commande</option>
+                                            <option value="NON_DISPONIBLE">Non Disponible</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="dateDisponibilite" class="form-label">Date de Disponibilité</label>
+                                        <input type="date" id="dateDisponibilite" name="date_disponibilite" class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="photo" class="form-label">Photo</label>
+                                        <input type="file" name="photo" class="form-control" required>
+                                    </div>
+                                    <!-- Options Section -->
+                                    <div class="mb-3">
+                                        <label for="options" class="form-label">Options</label>
+                                        <div id="addOptions" class="option-list">
+                                            <div class="option-item">
+                                                <input type="text" name="optionDescriptions[0]" class="form-control option-input" placeholder="Description" required>
+                                                <input type="number" name="optionPrices[0]" class="form-control option-input" placeholder="Prix" required>
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="removeOptionField(this)">Supprimer</button>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-secondary" onclick="addOptionField()">Ajouter une Option</button>
+                                    </div>
+
+                                    <!-- Colors Section -->
+                                    <div class="mb-3">
+                                        <label for="couleurs" class="form-label">Couleurs</label>
+                                        <div id="addColors" class="color-list">
+                                            <div class="color-item">
+                                                <input type="text" name="colorNames[0]" class="form-control color-input" placeholder="Nom de la Couleur" required>
+                                                <input type="number" name="colorPrices[0]" class="form-control color-input" placeholder="Prix" required>
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="removeColorField(this)">Supprimer</button>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-secondary" onclick="addColorField()">Ajouter une Couleur</button>
+                                    </div>
+                                    <button type="submit" class="btn btn-success">Ajouter</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table to Display Voitures -->
+                <h2>Liste des Voitures</h2>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Modèle</th>
+                            <th>Prix</th>
+                            <th>Disponibilité</th>
+                            <th>Date Disponibilité</th>
+                            <th>Options</th>
+                            <th>Couleurs</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="voiture : ${voitures}">
+                            <td>
+                                <img th:src="@{'/' + ${voiture.photo}}" alt="Voiture Photo" style="width: 100px;" 
+                                onerror="this.src='/default-placeholder.jpg';">
+                            </td>
+                            <td th:text="${voiture.modele}"></td>
+                            <td th:text="${voiture.prix}"></td>
+                            <td th:text="${voiture.disponibilite}"></td>
+                            <td th:text="${voiture.date_disponibilite}"></td>
+                            <td>
+                                <ul>
+                                    <li th:each="option : ${voiture.options}" th:text="${option.description} + ' (' + ${option.prix_option} + '€)'"></li>
+                                </ul>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li th:each="couleur : ${voiture.couleurs}" th:text="${couleur.color_name} + ' (' + ${couleur.prix_couleur} + '€)'"></li>
+                                </ul>
+                            </td>
+                            <td>
+                                <a th:href="@{/voitures/update/{id}(id=${voiture.id_voiture})}" class="btn btn-warning btn-sm">Modifier</a>
+                                <form th:action="@{/voitures/{id}(id=${voiture.id_voiture})}" method="post" style="display:inline;">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function addOptionField() {
+            const optionContainer = document.getElementById('addOptions');
+            const index = optionContainer.children.length;
+            const optionItem = document.createElement('div');
+            optionItem.classList.add('option-item');
+            optionItem.innerHTML = `
+                <input type="text" name="optionDescriptions[${index}]" class="form-control option-input" placeholder="Description" required>
+                <input type="number" name="optionPrices[${index}]" class="form-control option-input" placeholder="Prix" required>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeOptionField(this)">Supprimer</button>
+            `;
+            optionContainer.appendChild(optionItem);
+        }
+
+        function removeOptionField(button) {
+            button.parentElement.remove();
+        }
+
+        function addColorField() {
+            const colorContainer = document.getElementById('addColors');
+            const index = colorContainer.children.length;
+            const colorItem = document.createElement('div');
+            colorItem.classList.add('color-item');
+            colorItem.innerHTML = `
+                <input type="text" name="colorNames[${index}]" class="form-control color-input" placeholder="Nom de la Couleur" required>
+                <input type="number" name="colorPrices[${index}]" class="form-control color-input" placeholder="Prix" required>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeColorField(this)">Supprimer</button>
+            `;
+            colorContainer.appendChild(colorItem);
+        }
+
+        function removeColorField(button) {
+            button.parentElement.remove();
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

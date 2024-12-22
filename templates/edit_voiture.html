@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier une Voiture</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Modifier une Voiture</h1>
+        <form id="updateVoitureForm" th:action="@{/voitures/update}" method="post">
+            <input type="hidden" name="id_voiture" th:value="${voiture.id_voiture}">
+            <div class="mb-3">
+                <label for="modele" class="form-label">Modèle</label>
+                <input type="text" id="modele" name="modele" class="form-control" th:value="${voiture.modele}" placeholder="Entrer le modèle" required>
+            </div>
+            <div class="mb-3">
+                <label for="prix" class="form-label">Prix</label>
+                <input type="number" step="0.01" id="prix" name="prix" class="form-control" th:value="${voiture.prix}" placeholder="Entrer le prix" required>
+            </div>
+            <div class="mb-3">
+                <label for="disponibilite" class="form-label">Disponibilité</label>
+                <select id="disponibilite" name="disponibilite" class="form-select" required>
+                    <option th:selected="${voiture.disponibilite == 'DISPONIBLE_IMMEDIATEMENT'}" value="DISPONIBLE_IMMEDIATEMENT">Disponible Immédiatement</option>
+                    <option th:selected="${voiture.disponibilite == 'DISPONIBLE_SUR_COMMANDE'}" value="DISPONIBLE_SUR_COMMANDE">Disponible sur Commande</option>
+                    <option th:selected="${voiture.disponibilite == 'NON_DISPONIBLE'}" value="NON_DISPONIBLE">Non Disponible</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="dateDisponibilite" class="form-label">Date de Disponibilité</label>
+                <input type="date" id="dateDisponibilite" name="date_disponibilite" class="form-control" th:value="${#dates.format(voiture.date_disponibilite, 'yyyy-MM-dd')}">
+            </div>
+            <div class="mb-3">
+                <label for="photo" class="form-label">Photo</label>
+                <input type="text" id="photo" name="photo" class="form-control" th:value="${voiture.photo}" placeholder="Enter the file path here" required>
+            </div>
+            <div class="mb-3">
+                <label for="options" class="form-label">Options</label>
+                <div id="updateOptions" class="option-list">
+                    <div th:each="option, iterStat : ${voiture.options}" class="option-item">
+                        <input type="text" name="optionDescriptions" class="form-control option-input" th:value="${option.description}" placeholder="Description" required>
+                        <input type="number" name="optionPrices" class="form-control option-input" th:value="${option.option_prix}" placeholder="Prix" required>
+                        <button type="button" class="btn btn-danger" onclick="removeOptionField(this)">Supprimer</button>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addOptionField('updateOptions')">Ajouter une Option</button>
+            </div>
+            <div class="mb-3">
+                <label for="couleurs" class="form-label">Couleurs</label>
+                <div id="updateColors" class="color-list">
+                    <div th:each="couleur, iterStat : ${voiture.couleurs}" class="color-item">
+                        <input type="text" name="colorNames" class="form-control color-input" th:value="${couleur.color_name}" placeholder="Nom de la Couleur" required>
+                        <input type="number" name="colorPrices" class="form-control color-input" th:value="${couleur.prix_couleur}" placeholder="Prix" required>
+                        <button type="button" class="btn btn-danger" onclick="removeColorField(this)">Supprimer</button>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addColorField('updateColors')">Ajouter une Couleur</button>
+            </div>
+            <button type="submit" class="btn btn-success">Mettre à Jour</button>
+        </form>
+    </div>
+
+    <script>
+        function addOptionField(targetId) {
+            const optionContainer = document.getElementById(targetId);
+            const optionItem = document.createElement('div');
+            optionItem.classList.add('option-item');
+            optionItem.innerHTML = `
+                <input type="text" name="optionDescriptions" class="form-control option-input" placeholder="Description" required>
+                <input type="number" name="optionPrices" class="form-control option-input" placeholder="Prix" required>
+                <button type="button" class="btn btn-danger" onclick="removeOptionField(this)">Supprimer</button>
+            `;
+            optionContainer.appendChild(optionItem);
+        }
+
+        function removeOptionField(button) {
+            button.closest('.option-item').remove();
+        }
+        
+        function addColorField(targetId) {
+            const colorContainer = document.getElementById(targetId);
+            const colorItem = document.createElement('div');
+            colorItem.classList.add('color-item');
+            colorItem.innerHTML = `
+                <input type="text" name="colorNames" class="form-control color-input" placeholder="Nom de la Couleur" required>
+                <input type="number" name="colorPrices" class="form-control color-input" placeholder="Prix" required>
+                <button type="button" class="btn btn-danger" onclick="removeColorField(this)">Supprimer</button>
+            `;
+            colorContainer.appendChild(colorItem);
+        }
+
+        function removeColorField(button) {
+            button.closest('.color-item').remove();
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
